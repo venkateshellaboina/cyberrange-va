@@ -1,0 +1,19 @@
+{
+  "boatSlips": [
+    {
+      "slipNumber": 1,
+      "vacant": false,
+      "vesselName": "Seas the day"
+    },
+    {
+      "slipNumber": 2,
+      "vacant": false,
+      "vesselName": "Seas the day"
+    },
+    {
+      "slipNumber": 3,
+      "vacant": false,
+      "vesselName": "Seas the day"
+    }
+  ]
+}

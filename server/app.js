@@ -8,35 +8,39 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-let lowdb = lowdbConfig()
-await lowdb.read()
-
-if (!lowdb.data){
-    // boat slips base json
-    const boatSlipsInit = [
-        {
-            slipNumber: 1,
-            vacant: true,
-            vesselName: undefined
-        },
-        {
-            slipNumber: 2,
-            vacant: true,
-            vesselName: undefined
-        },
-        {
-            slipNumber: 3,
-            vacant: true,
-            vesselName: undefined
-        }
-    ]
-    lowdb.data = {boatSlips: boatSlipsInit}
+var lowdb = undefined
+const initiateLowdb = async () => {
+    lowdb = lowdbConfig()
+    await lowdb.read()
+    if (!lowdb.data || !(process.env.JEST_WORKER_ID === undefined || process.env.NODE_ENV !== 'test')){
+        // boat slips base json
+        const boatSlipsInit = [
+            {
+                slipNumber: 1,
+                vacant: true,
+                vesselName: undefined
+            },
+            {
+                slipNumber: 2,
+                vacant: true,
+                vesselName: undefined
+            },
+            {
+                slipNumber: 3,
+                vacant: true,
+                vesselName: undefined
+            }
+        ]
+        lowdb.data = {boatSlips: boatSlipsInit}
+    }
+    console.log(lowdb.data)
 }
+await initiateLowdb()
 
 
 
 app.get("/boat-slips", (req, res) => {
-    res.json(lowdb.data.boatSlips)
+    res.status(200).json(lowdb.data.boatSlips)
     return
 })
 
@@ -65,8 +69,7 @@ app.post("/boat-slips", async (req, res) => {
 
 app.put("/boat-slips/:slipNumber/vacate", async (req, res) => {
     let {params: {slipNumber}} = req
-    slipNumber -= 1
-    let isVacant = lowdb.data.boatSlips[slipNumber].vacant
+    let isVacant = lowdb.data.boatSlips[slipNumber-1].vacant
 
     if(isVacant){
         let isVacantError = "Boat slip '" + slipNumber + "' is currently vacant"
@@ -74,8 +77,8 @@ app.put("/boat-slips/:slipNumber/vacate", async (req, res) => {
         return
     }
 
-    lowdb.data.boatSlips[slipNumber].vacant = true
-    lowdb.data.boatSlips[slipNumber].vesselName = undefined
+    lowdb.data.boatSlips[slipNumber-1].vacant = true
+    lowdb.data.boatSlips[slipNumber-1].vesselName = undefined
 
     await lowdb.write()
 
