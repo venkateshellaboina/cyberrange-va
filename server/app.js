@@ -3,7 +3,7 @@ import cors from 'cors';
 import getVacantSlipNumber from './utils/util.js';
 import lowdbInit from './database/setup.js';
 import { boatSlipsInit } from './database/boatSlipsBase.js';
-import { NO_AVAILABLE_BOAT_SLIP, BOAT_SLIP_VACANT, URI_GET_BOATSLIPS, URI_POST_BOATSLIPS, URI_PUT_BOATSLIP } from './constants/constants.js'
+import { NO_AVAILABLE_BOAT_SLIP, BOAT_SLIP_VACANT, BOAT_SLIP_NOT_FOUND, URI_GET_BOATSLIPS, URI_POST_BOATSLIPS, URI_PUT_BOATSLIP } from './constants/constants.js'
 
 // set up express app
 const app = express();
@@ -49,6 +49,11 @@ app.post(URI_POST_BOATSLIPS, async (req, res) => {
 
 app.put(URI_PUT_BOATSLIP, async (req, res) => {
     let {params: {slipNumber}} = req
+    if(slipNumber < 1 || slipNumber > 3){
+        let notFoundError = BOAT_SLIP_NOT_FOUND.replace('x', slipNumber)
+        res.status(404).json({statusCode: 404, Message: notFoundError})
+        return
+    }
     let isVacant = lowdb.data.boatSlips[slipNumber-1].vacant
 
     if(isVacant){

@@ -38,5 +38,12 @@ describe("Testing App", () => {
                 expect(response.statusCode).toBe(409)
                 expect(response.body.Message).toBe(isVacantError)
         })
+        test("should respond with a 404 status code", async () => {
+            let url = "/boat-slips/" + String(4) + "/vacate"
+            let response = await request(app).put(url)
+            let notFoundError = "Boat slip '" + 4 + "' not found."
+            expect(response.statusCode).toBe(404)
+            expect(response.body.Message).toBe(notFoundError)
+        })
     })
 })
