@@ -1,43 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import getVacantSlipNumber from './utils/util.js';
-import lowdbConfig from './database/setup.js';
+import lowdbInit from './database/setup.js';
 
 // set up express app
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-var lowdb = undefined
-const initiateLowdb = async () => {
-    lowdb = lowdbConfig()
-    await lowdb.read()
-    if (!lowdb.data || !(process.env.JEST_WORKER_ID === undefined || process.env.NODE_ENV !== 'test')){
-        // boat slips base json
-        const boatSlipsInit = [
-            {
-                slipNumber: 1,
-                vacant: true,
-                vesselName: undefined
-            },
-            {
-                slipNumber: 2,
-                vacant: true,
-                vesselName: undefined
-            },
-            {
-                slipNumber: 3,
-                vacant: true,
-                vesselName: undefined
-            }
-        ]
-        lowdb.data = {boatSlips: boatSlipsInit}
-    }
-    console.log(lowdb.data)
-}
-await initiateLowdb()
-
-
+var lowdb = await lowdbInit()
 
 app.get("/boat-slips", (req, res) => {
     res.status(200).json(lowdb.data.boatSlips)
@@ -56,7 +27,6 @@ app.post("/boat-slips", async (req, res) => {
     
     lowdb.data.boatSlips[slipNumber-1].vesselName = vesselName
     lowdb.data.boatSlips[slipNumber-1].vacant = false
-    console.log(lowdb.data)
 
     await lowdb.write()
 
