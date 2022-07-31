@@ -1,4 +1,5 @@
 /node_modules
+database.*
 database.json
 database.test.json
 .env
