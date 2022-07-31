@@ -12,7 +12,7 @@ app.use(express.json());
 // set up environment
 dotenv.config();
 
-lowdb = lowdbConfig()
+let lowdb = lowdbConfig()
 await lowdb.read()
 
 if (!lowdb.data){
@@ -42,6 +42,29 @@ if (!lowdb.data){
 app.get("/boat-slips", (req, res) => {
     res.json(lowdb.data.boatSlips)
     return
+})
+
+app.post("/boat-slips", async (req, res) => {
+    const {body: {vesselName}} = req
+    let boatSlips = lowdb.data.boatSlips
+    let slipNumber = getVacantSlipNumber(boatSlips)
+
+    if(slipNumber == -1){
+        res.status(409).json({Message: "There are no available boat slips."})
+        return
+    }
+
+    slipNumber -= 1 // To set the object index
+    
+    lowdb.data.boatSlips[slipNumber].vesselName = vesselName
+    lowdb.data.boatSlips[slipNumber].vacant = false
+    console.log(lowdb.data)
+
+    await lowdb.write()
+
+    res.json({slipNumber: slipNumber+1})
+    return
+
 })
 
 
