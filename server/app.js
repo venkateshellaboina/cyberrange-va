@@ -49,7 +49,6 @@ app.post("/boat-slips", async (req, res) => {
         res.status(409).json({Message: "There are no available boat slips."})
         return
     }
-
     
     lowdb.data.boatSlips[slipNumber-1].vesselName = vesselName
     lowdb.data.boatSlips[slipNumber-1].vacant = false
@@ -60,6 +59,28 @@ app.post("/boat-slips", async (req, res) => {
     res.json({slipNumber: slipNumber})
     return
 
+})
+
+
+
+app.put("/boat-slips/:slipNumber/vacate", async (req, res) => {
+    let {params: {slipNumber}} = req
+    slipNumber -= 1
+    let isVacant = lowdb.data.boatSlips[slipNumber].vacant
+
+    if(isVacant){
+        let isVacantError = "Boat slip '" + slipNumber + "' is currently vacant"
+        res.status(409).json({Message: isVacantError})
+        return
+    }
+
+    lowdb.data.boatSlips[slipNumber].vacant = true
+    lowdb.data.boatSlips[slipNumber].vesselName = undefined
+
+    await lowdb.write()
+
+    res.status(204).send()
+    return
 })
 
 
