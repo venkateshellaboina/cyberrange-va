@@ -34,7 +34,7 @@ describe("Testing App", () => {
         test("should respond with a 409 status code", async () => {
                 let url = "/boat-slips/" + String(1) + "/vacate"
                 let response = await request(app).put(url)
-                let isVacantError = "Boat slip '" + 1 + "' is currently vacant"
+                let isVacantError = "Boat slip '" + 1 + "' is currently vacant."
                 expect(response.statusCode).toBe(409)
                 expect(response.body.Message).toBe(isVacantError)
         })

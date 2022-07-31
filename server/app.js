@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import getVacantSlipNumber from './utils/util.js';
 import lowdbInit from './database/setup.js';
+import { boatSlipsInit } from './database/boatSlipsBase.js';
 import { NO_AVAILABLE_BOAT_SLIP, BOAT_SLIP_VACANT, URI_GET_BOATSLIPS, URI_POST_BOATSLIPS, URI_PUT_BOATSLIP } from './constants/constants.js'
 
 // set up express app
@@ -9,7 +10,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-var lowdb = await lowdbInit()
+const initiateBoatSlipsData = async (lowdb) => {
+    //check if the current environment is 'test'
+    if (!lowdb.data || !(process.env.JEST_WORKER_ID === undefined || process.env.NODE_ENV !== 'test')){
+        lowdb.data = {boatSlips: boatSlipsInit}
+    }
+    return lowdb
+}
+
+let lowdb = await lowdbInit()
+lowdb = await initiateBoatSlipsData(lowdb)
 
 app.get(URI_GET_BOATSLIPS, (req, res) => {
     res.status(200).json(lowdb.data.boatSlips)
@@ -55,7 +65,6 @@ app.put(URI_PUT_BOATSLIP, async (req, res) => {
     res.status(204).send()
     return
 })
-
 
 
 export default app
